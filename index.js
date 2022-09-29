@@ -25,12 +25,10 @@ const moment = require('moment');
         if (!isSaturday && !isSunday) {
             const dateString = moment(day, "DD/MM/YYYY").format("DD/MM/YYYY");
             dates.push(dateString.split("/").join("."));
-        } else {
-            console.log(isSaturday ? 'Samstag gefunden. Wird nicht gebucht.' : 'Sonntag gefunden. Wird nicht gebucht.');
         }
     })
 
-    console.log('Tage, die gebucht werden: ', dates);
+    console.log('Auf folgende Tage wird gebucht: ', dates);
 
     const browser = await puppeteer.launch({
         headless: true});
