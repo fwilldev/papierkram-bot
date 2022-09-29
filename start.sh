@@ -2,8 +2,8 @@ read -p 'Papierkram URL mit https, ohne / am Ende: ' urlvar
 read -p 'Start Datum (Format: DD.MM.YYYY): ' startdatevar
 read -p 'End Datum (Format: DD.MM.YYYY): ' enddatevar
 read -p 'Start Zeit: (Format: HH:MM)' starttimevar
-read -p 'End Zeit: (Format: HH:MM)' endtimevar
-read -p 'Tätigkeitsbeschreibung: (zB Entwicklung)' descriptionvar
+read -p 'End Zeit: (Format: HH:MM) ' endtimevar
+read -p 'Tätigkeitsbeschreibung: (zB Entwicklung) ' descriptionvar
 read -p 'Email Adresse: ' emailvar
 echo 'Passwort: '
 read -s passwortvar
