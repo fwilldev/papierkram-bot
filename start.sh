@@ -20,4 +20,6 @@ if [ ! -d "$DIR" ]; then
     npm install
 fi
 
+
 node index.js $startdatevar $enddatevar $starttimevar $endtimevar $descriptionvar $emailvar $passwortvar $urlvar
+echo "Script durchgelaufen. Bitte Zeiten nochmal kontrollieren!"
