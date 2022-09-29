@@ -20,11 +20,13 @@ const moment = require('moment');
 
     var dates = [];
     result.map(day => {
-        if (!(day.getDay() % 6)) {
+        const isSaturday = day.toDate().getDay() === 6;
+        const isSunday =  day.toDate().getDay() === 0;
+        if (!isSaturday && !isSunday) {
             const dateString = moment(day, "DD/MM/YYYY").format("DD/MM/YYYY");
             dates.push(dateString.split("/").join("."));
         } else {
-            console.log(day.getDay() + 'ist ein Wochenend-Datum, also wird hier nicht gebucht');
+            console.log(isSaturday ? 'Samstag gefunden. Wird nicht gebucht.' : 'Sonntag gefunden. Wird nicht gebucht.');
         }
     })
 
