@@ -107,9 +107,9 @@ const isValidUrl = urlString => {
         await page.click('input[name="commit"]', {delay: 500});
         console.log('Zeit gebucht für: ', day);
         await page.waitForTimeout(1000);
-        await page.goto(url + '/zeiterfassung/buchungen?b=&show_new_form=true', {waitUntil: "networkidle2"});
+        await page.goto(correctUrl + 'zeiterfassung/buchungen?b=&show_new_form=true', {waitUntil: "networkidle2"});
     }
-    const controlUrl = url + '/zeiterfassung/buchungen?t=' + moment(firstDate, 'YYYY-MM-DD') + '..' +  moment(lastDate, 'YYYY-MM-DD');
+    const controlUrl = url + '/zeiterfassung/buchungen?t=' + firstDate.format('YYYY-MM-DD') + '..' + lastDate.format('YYYY-MM-DD');
     await page.waitForSelector('.logout');
     await page.click('.logout', {delay: 1000});
     console.log('Logout erfolgreich. Bitte Zeiten kontrollieren: ' + controlUrl);
