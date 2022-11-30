@@ -53,16 +53,16 @@ const isValidUrl = urlString => {
         height: 1080,
         deviceScaleFactor: 1,
     });
-    const loginUrl = url.endsWith("/") ? url + "login" : url + '/login';
+    const correctUrl = url.endsWith("/") ? url : url + '/';
     console.log("Logge ein in: ", url);
-    await page.goto(loginUrl, {waitUntil: "networkidle2"});
+    await page.goto(correctUrl + "login", {waitUntil: "networkidle2"});
     await page.type('#user_new_email', email, {delay: 100});
     await page.type('#user_new_password', password, {delay: 100});
     await page.click('input[name="commit"]', {delay: 500});
     console.log('Login erfolgreich für User:  ', email);
     await page.waitForSelector('.user-name');
     await page.waitForSelector('i.icon-pk-tracker');
-    await page.goto(url + '/zeiterfassung/buchungen?b=&show_new_form=true', {waitUntil: "networkidle2"});
+    await page.goto(correctUrl + 'zeiterfassung/buchungen?b=&show_new_form=true', {waitUntil: "networkidle2"});
     let selectedProject = "";
     let projectElement = undefined;
 

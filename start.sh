@@ -1,6 +1,6 @@
 echo "Papierkram Bot V1"
 echo "--------------------------------"
-echo "Automatisches Zeiten buchen vom Start Datum bis End Datum - Wochenenden ausgeschlossen."
+echo "Automatisch Zeiten buchen vom Start Datum bis End Datum - Wochenenden ausgeschlossen."
 read -p 'Papierkram URL: ' urlvar
 read -p 'Start Datum (Format: DD.MM.YYYY): ' startdatevar
 read -p 'End Datum (Format: DD.MM.YYYY): ' enddatevar
@@ -17,8 +17,11 @@ then
       exit 0
 fi
 
-echo "Prüfe und installiere Dependencies: "
-npm install
+DIR="node_modules"
+if [ ! -d "$DIR" ]; then
+    echo "Node Modules existieren nicht. Werden installiert: "
+    npm install
+fi
 
 node index.js $startdatevar $enddatevar $starttimevar $endtimevar $descriptionvar $emailvar $passwortvar $urlvar
 echo "Script durchgelaufen."
