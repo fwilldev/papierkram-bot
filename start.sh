@@ -23,5 +23,5 @@ if [ ! -d "$DIR" ]; then
     npm install
 fi
 
-node index.js $startdatevar $enddatevar $starttimevar $endtimevar $descriptionvar $emailvar $passwortvar $urlvar
+node index.js $startdatevar $enddatevar $starttimevar $endtimevar "$descriptionvar" $emailvar $passwortvar $urlvar
 echo "Script durchgelaufen."
