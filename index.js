@@ -54,14 +54,14 @@ const isValidUrl = urlString => {
         deviceScaleFactor: 1,
     });
     const correctUrl = url.endsWith("/") ? url : url + '/';
-    console.log("Logge ein in: ", url);
+    console.log("Logge ein in: ", correctUrl);
     await page.goto(correctUrl + "login", {waitUntil: "networkidle2"});
     await page.type('#user_new_email', email, {delay: 100});
     await page.type('#user_new_password', password, {delay: 100});
     await page.click('input[name="commit"]', {delay: 500});
-    console.log('Login erfolgreich für User:  ', email);
     await page.waitForSelector('.user-name');
     await page.waitForSelector('i.icon-pk-tracker');
+    console.log('Login erfolgreich für User:  ', email);
     await page.goto(correctUrl + 'zeiterfassung/buchungen?b=&show_new_form=true', {waitUntil: "networkidle2"});
     let selectedProject = "";
     let projectElement = undefined;
@@ -79,16 +79,14 @@ const isValidUrl = urlString => {
                 console.log(elementText);
             }
             selectedProject = prompt('Gebe den Namen des Projektes ein: ').trim();
-            for (const e of elementHandle) {
-                const elementText = await page.evaluate(el => el.textContent, e);
-                if (elementText === selectedProject) {
-                    console.log("Buche auf Projekt: ", selectedProject);
-                    projectElement = e;
-                    break;
-                }
+        }
+        for (const e of elementHandle) {
+            const elementText = await page.evaluate(el => el.textContent, e);
+            if (elementText === selectedProject) {
+                console.log("Buche auf Projekt: ", selectedProject);
+                projectElement = e;
             }
         }
-
         if (projectElement) {
             await projectElement.click({delay: 200})
         } else {
