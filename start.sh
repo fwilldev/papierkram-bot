@@ -1,13 +1,29 @@
 echo "Papierkram Bot V1"
 echo "--------------------------------"
 echo "Automatisch Zeiten buchen vom Start Datum bis End Datum - Wochenenden ausgeschlossen."
-read -p 'Papierkram URL: ' urlvar
+if [ ! -f history.json ];
+then
+  read -p 'Papierkram URL: ' urlvar
+else
+  urlvar=$(grep -o '"url": "[^"]*' history.json | grep -o '[^"]*$')
+fi
 read -p 'Start Datum (Format: DD.MM.YYYY): ' startdatevar
 read -p 'End Datum (Format: DD.MM.YYYY): ' enddatevar
 read -p 'Start Zeit: (Format: HH:MM) ' starttimevar
 read -p 'End Zeit: (Format: HH:MM) ' endtimevar
-read -p 'Tätigkeitsbeschreibung: (zB Entwicklung) ' descriptionvar
-read -p 'Email Adresse: ' emailvar
+if [ ! -f history.json ];
+then
+  read -p 'Tätigkeitsbeschreibung: (zB Entwicklung) ' descriptionvar
+else
+  descriptionvar=$(grep -o '"subject": "[^"]*' history.json | grep -o '[^"]*$')
+fi
+if [ ! -f history.json ];
+then
+  read -p 'Email Adresse: ' emailvar
+else
+  emailvar=$(grep -o '"email": "[^"]*' history.json | grep -o '[^"]*$')
+  echo "Folgende E-Mail wird verwendet:" $emailvar
+fi
 echo 'Passwort: '
 read -s passwortvar
 

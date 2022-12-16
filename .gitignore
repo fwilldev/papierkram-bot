@@ -1,3 +1,4 @@
 node_modules
 .idea
 start-test.sh
+history.json

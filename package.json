@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "cli-select": "^1.1.2",
     "moment": "^2.29.4",
     "prompt-sync": "^4.2.0",
     "puppeteer": "^17.0.0"
@@ -12,5 +13,6 @@
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "type": "module"
 }
