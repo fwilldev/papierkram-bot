@@ -1,6 +1,6 @@
 # Papierkram-Bot
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
-
+[![npm version](https://badge.fury.io/js/papierkram-bot.svg)](https://badge.fury.io/js/papierkram-bot)
 
 Automatische Zeiterfassung für die Finanzbuchhaltungssoftware "Papierkram".
 
