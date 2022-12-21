@@ -1,4 +1,3 @@
-# Set the text to display in the banner
 echo "
 
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import puppeteer from 'puppeteer'
 import moment from 'moment'
 import history from './history.js'
