@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'fs/promises'
 const fileName = 'history.json'
 
 const history = () => {
-  const historyObject = {}
+  let historyObject = {}
 
   readFile(new URL(`./${fileName}`, import.meta.url), { encoding: 'utf8' })
     .then(value => (historyObject = JSON.parse(value)))

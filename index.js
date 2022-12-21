@@ -4,22 +4,20 @@ import history from './history.js'
 import p from 'prompt-sync'
 import cliSelect from 'cli-select'
 
-const prompt = p({ sigint: true })
-
 const isValidUrl = urlString => {
-  var urlPattern = new RegExp(
-    '^(https?:\\/\\/)?' + // validate protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
-      '(\\#[-a-z\\d_]*)?$',
-    'i'
-  ) // validate fragment locator
+      const urlPattern = new RegExp(
+          '^(https?:\\/\\/)?' + // validate protocol
+          '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
+          '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
+          '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
+          '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
+          '(\\#[-a-z\\d_]*)?$',
+          'i'
+      ); // validate fragment locator
   return !!urlPattern.test(urlString)
 }
 
-;(async () => {
+(async () => {
   moment.locale('de')
   const firstDate = moment(process.argv[2], 'DD/MM/YYYY') // start date
   const lastDate = moment(process.argv[3], 'DD/MM/YYYY') // end date
@@ -40,14 +38,14 @@ const isValidUrl = urlString => {
   history.set('url', url)
   history.save()
 
-  var result = [moment({ ...firstDate })]
+  let result = [moment({...firstDate})];
 
   while (lastDate.date() !== firstDate.date()) {
     firstDate.add(1, 'day')
     result.push(moment({ ...firstDate }))
   }
 
-  var dates = []
+  let dates = []
   result.map(day => {
     const isSaturday = day.toDate().getDay() === 6
     const isSunday = day.toDate().getDay() === 0
@@ -103,11 +101,16 @@ const isValidUrl = urlString => {
           )
         )
       })
-
       selectedProject = selection.value
     }
 
-    console.log('Buche auf Projekt: ', selectedProject)
+    for (const e of elementHandle) {
+      const elementText = await page.evaluate(el => el.textContent, e);
+      if (elementText === selectedProject) {
+        console.log("Buche auf Projekt: ", selectedProject);
+        projectElement = e;
+      }
+    }
 
     if (projectElement) {
       await projectElement.click({ delay: 200 })
@@ -143,8 +146,8 @@ const isValidUrl = urlString => {
     )
   }
   const controlUrl =
-    url +
-    '/zeiterfassung/buchungen?t=' +
+    correctUrl +
+    'zeiterfassung/buchungen?t=' +
     firstDate.format('YYYY-MM-DD') +
     '..' +
     lastDate.format('YYYY-MM-DD')
