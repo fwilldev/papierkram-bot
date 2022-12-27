@@ -5,6 +5,8 @@ import moment from 'moment'
 import history from './history.js'
 import p from 'prompt-sync'
 import cliSelect from 'cli-select'
+import {isHoliday} from "feiertagejs";
+import regionCodes from "./regioncodes.js";
 
 const isValidUrl = urlString => {
       const urlPattern = new RegExp(
@@ -40,6 +42,17 @@ const isValidUrl = urlString => {
   history.set('url', url)
   history.save()
 
+  const regionNames = Object.values(regionCodes);
+  const regionKeys = Object.keys(regionCodes);
+
+  const selectedRegion = await cliSelect({
+    values: regionNames,
+    prompt: 'Welches Bundesland und deren Feiertage sollen berücksichtigt werden? '
+  });
+
+  const selectedRegionKey = regionKeys[regionNames.indexOf(selectedRegion.value)];
+  console.log("Gewähltes Bundesland: ", selectedRegionKey);
+
   let result = [moment({...firstDate})];
 
   while (lastDate.date() !== firstDate.date()) {
@@ -51,11 +64,15 @@ const isValidUrl = urlString => {
   result.map(day => {
     const isSaturday = day.toDate().getDay() === 6
     const isSunday = day.toDate().getDay() === 0
-    if (!isSaturday && !isSunday) {
+    if (!isSaturday && !isSunday && !isHoliday(day.toDate(), selectedRegionKey)) {
       const dateString = moment(day, 'DD/MM/YYYY').format('DD/MM/YYYY')
       dates.push(dateString.split('/').join('.'))
     }
   })
+  if (dates.length === 0) {
+    console.log('In der angegebenen Zeitspanne wurden keine validen Tage gefunden.')
+    return;
+  }
 
   console.log('Auf folgende Tage wird gebucht: ', dates)
   const browser = await puppeteer.launch({

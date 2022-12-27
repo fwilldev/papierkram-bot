@@ -15,7 +15,7 @@ echo "
 
 
 "
-echo "Automatisch Zeiten buchen vom Start Datum bis End Datum - Wochenenden ausgeschlossen."
+echo "Automatisch Zeiten buchen vom Start Datum bis End Datum - Wochenenden und Feiertage für ausgewähltes Bundesland ausgeschlossen."
 read -p 'Start Datum (Format: DD.MM.YYYY): ' startdatevar
 read -p 'End Datum (Format: DD.MM.YYYY): ' enddatevar
 read -p 'Start Zeit: (Format: HH:MM) ' starttimevar
@@ -28,8 +28,9 @@ if [ -f history.json ]; then
   echo '-----------Historie-----------'
   echo 'Zuletzt verwendet:'
   echo 'Papierkram-URL: ' "$urlvar"
-  echo 'E-Mail Adresse: ' "$descriptionvar"
-  echo 'Tätigkeitsbeschreibung: ' "$emailvar"
+  echo 'E-Mail Adresse: ' "$emailvar"
+  echo 'Tätigkeitsbeschreibung: ' "$descriptionvar"
+  echo '------------------------------'
   while [[ $input != "y" && $input != "n" ]]; do
     read -p "Werte aus der Historie verwenden? [y/n]" input
   done
