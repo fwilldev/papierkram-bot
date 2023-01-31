@@ -7,28 +7,21 @@ on:
   workflow_dispatch:
     
 jobs:
-  version:
-    runs-on: ubuntu-latest
-    environment: NPM
-    if: "!startsWith(github.event.head_commit.message, '[RELEASE]')"
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-      - run: git config --global user.name 'Fabian Will'
-      - run: git config --global user.email 'mail@fwill.dev'
-      - run: npm version patch -m "[RELEASE] %s"
-      - run: git push
   publish-npm:
     runs-on: ubuntu-latest
     environment: NPM
-    needs: [version]
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
+      - run: git config --global user.name 'Fabian Will'
+      - run: git config --global user.email 'mail@fwill.dev'
+      - run: npm version patch -m "[RELEASE] %s"
+      - run: git push
       - run: npm install
       - run: npm publish
         env:
