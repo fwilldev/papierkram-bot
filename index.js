@@ -52,7 +52,7 @@ const isValidUrl = urlString => {
 
   const selectedRegionKey = regionKeys[regionNames.indexOf(selectedRegion.value)];
   console.log("Gewähltes Bundesland: ", selectedRegionKey);
-
+  const firstDateForUrl = firstDate;
   let result = [moment({...firstDate})];
 
   while (lastDate.date() !== firstDate.date()) {
@@ -167,7 +167,7 @@ const isValidUrl = urlString => {
   const controlUrl =
     correctUrl +
     'zeiterfassung/buchungen?t=' +
-    firstDate.format('YYYY-MM-DD') +
+    firstDateForUrl.format('YYYY-MM-DD') +
     '..' +
     lastDate.format('YYYY-MM-DD')
   await page.waitForSelector('.logout')
