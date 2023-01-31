@@ -59,8 +59,8 @@ fi
 
 if [ ! -d "node_modules" ]; then
     echo "Node Modules existieren nicht. Werden installiert: "
-    npm install
+    npm install -g
 fi
 
-node index.js "$startdatevar" "$enddatevar" "$starttimevar" "$endtimevar" "$descriptionvar" "$emailvar" "$passwortvar" "$urlvar"
+npx index.js "$startdatevar" "$enddatevar" "$starttimevar" "$endtimevar" "$descriptionvar" "$emailvar" "$passwortvar" "$urlvar"
 echo "Script durchgelaufen."

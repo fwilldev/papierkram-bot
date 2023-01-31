@@ -8,6 +8,9 @@
   },
   "name": "papierkram-bot",
   "version": "1.0.2",
+  "directories": {
+    "bin": "./"
+  },
   "bin": "./start.sh",
   "main": "index.js",
   "scripts": {
