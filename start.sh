@@ -56,11 +56,5 @@ if test -z "$startdatevar" || test -z "$enddatevar" || test -z "$starttimevar" |
       exit 0
 fi
 
-
-if [ ! -d "node_modules" ]; then
-    echo "Node Modules existieren nicht. Werden installiert: "
-    npm install -g
-fi
-
 npx index.js "$startdatevar" "$enddatevar" "$starttimevar" "$endtimevar" "$descriptionvar" "$emailvar" "$passwortvar" "$urlvar"
 echo "Script durchgelaufen."
