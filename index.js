@@ -3,25 +3,24 @@
 import puppeteer from 'puppeteer'
 import moment from 'moment'
 import history from './history.js'
-import p from 'prompt-sync'
 import cliSelect from 'cli-select'
-import {isHoliday} from "feiertagejs";
-import regionCodes from "./regioncodes.js";
+import regionCodes from './regioncodes.js'
+import { isHoliday } from 'feiertagejs'
 
 const isValidUrl = urlString => {
-      const urlPattern = new RegExp(
-          '^(https?:\\/\\/)?' + // validate protocol
-          '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
-          '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
-          '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
-          '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
-          '(\\#[-a-z\\d_]*)?$',
-          'i'
-      ); // validate fragment locator
+  const urlPattern = new RegExp(
+    '^(https?:\\/\\/)?' + // validate protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // validate domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))' + // validate OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // validate port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?' + // validate query string
+      '(\\#[-a-z\\d_]*)?$',
+    'i'
+  ) // validate fragment locator
   return !!urlPattern.test(urlString)
 }
 
-(async () => {
+;(async () => {
   moment.locale('de')
   const firstDate = moment(process.argv[2], 'DD/MM/YYYY') // start date
   const lastDate = moment(process.argv[3], 'DD/MM/YYYY') // end date
@@ -42,18 +41,21 @@ const isValidUrl = urlString => {
   history.set('url', url)
   history.save()
 
-  const regionNames = Object.values(regionCodes);
-  const regionKeys = Object.keys(regionCodes);
+  const regionNames = Object.values(regionCodes)
+  const regionKeys = Object.keys(regionCodes)
 
+  console.log(
+    'Welches Bundesland und deren Feiertage sollen berücksichtigt werden? '
+  )
   const selectedRegion = await cliSelect({
-    values: regionNames,
-    prompt: 'Welches Bundesland und deren Feiertage sollen berücksichtigt werden? '
-  });
+    values: regionNames
+  })
 
-  const selectedRegionKey = regionKeys[regionNames.indexOf(selectedRegion.value)];
-  console.log("Gewähltes Bundesland: ", selectedRegionKey);
-  const firstDateForUrl = firstDate;
-  let result = [moment({...firstDate})];
+  const selectedRegionKey =
+    regionKeys[regionNames.indexOf(selectedRegion.value)]
+  console.log('Gewähltes Bundesland: ', selectedRegion)
+  const firstDateForUrl = firstDate
+  let result = [moment({ ...firstDate })]
 
   while (lastDate.date() !== firstDate.date()) {
     firstDate.add(1, 'day')
@@ -64,14 +66,20 @@ const isValidUrl = urlString => {
   result.map(day => {
     const isSaturday = day.toDate().getDay() === 6
     const isSunday = day.toDate().getDay() === 0
-    if (!isSaturday && !isSunday && !isHoliday(day.toDate(), selectedRegionKey)) {
+    if (
+      !isSaturday &&
+      !isSunday &&
+      !isHoliday(day.toDate(), selectedRegionKey)
+    ) {
       const dateString = moment(day, 'DD/MM/YYYY').format('DD/MM/YYYY')
       dates.push(dateString.split('/').join('.'))
     }
   })
   if (dates.length === 0) {
-    console.log('In der angegebenen Zeitspanne wurden keine validen Tage gefunden.')
-    return;
+    console.log(
+      'In der angegebenen Zeitspanne wurden keine validen Tage gefunden.'
+    )
+    return
   }
 
   console.log('Auf folgende Tage wird gebucht: ', dates)
@@ -124,10 +132,10 @@ const isValidUrl = urlString => {
     }
 
     for (const e of elementHandle) {
-      const elementText = await page.evaluate(el => el.textContent, e);
+      const elementText = await page.evaluate(el => el.textContent, e)
       if (elementText === selectedProject) {
-        console.log("Buche auf Projekt: ", selectedProject);
-        projectElement = e;
+        console.log('Buche auf Projekt: ', selectedProject)
+        projectElement = e
       }
     }
 
@@ -135,7 +143,7 @@ const isValidUrl = urlString => {
       await projectElement.click({ delay: 200 })
     } else {
       await browser.close()
-      throw new Error('Project nicht gefunden: ' + selectedProject)
+      throw new Error('Projekt nicht gefunden: ' + selectedProject)
     }
 
     await page.type('#tracker_time_entry_new_complete_task_name', subject, {
