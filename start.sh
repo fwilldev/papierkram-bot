@@ -56,5 +56,5 @@ if test -z "$startdatevar" || test -z "$enddatevar" || test -z "$starttimevar" |
       exit 0
 fi
 
-node index.js "$startdatevar" "$enddatevar" "$starttimevar" "$endtimevar" "$descriptionvar" "$emailvar" "$passwortvar" "$urlvar"
+node index.js "$startdatevar" "$enddatevar" "$starttimevar" "$endtimevar" "$descriptionvar" "$emailvar" "$passwortvar" "$urlvar" "false"
 echo "Script durchgelaufen."

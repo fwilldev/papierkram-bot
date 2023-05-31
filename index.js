@@ -32,7 +32,10 @@ const isValidUrl = urlString => {
   history.set('email', email)
   const password = process.argv[8]
   let url = process.argv[9]
-
+  const dryRun = (process.argv[10] === 'true') // if true the bot will not book any times
+  if (dryRun) {
+    console.log('Testlauf aktiviert. Es werden keine Zeiten gebucht.')
+  }
   if (!isValidUrl(url) && !url.includes('papierkram.de')) {
     console.error('Eingabe URL ist nicht valide: ', url)
     return
@@ -53,8 +56,6 @@ const isValidUrl = urlString => {
 
   const selectedRegionKey =
     regionKeys[regionNames.indexOf(selectedRegion.value)]
-  console.log('Gewähltes Bundesland: ', selectedRegion)
-  const firstDateForUrl = firstDate
   let result = [moment({ ...firstDate })]
 
   while (lastDate.date() !== firstDate.date()) {
@@ -108,7 +109,6 @@ const isValidUrl = urlString => {
   )
   let selectedProject = ''
   let projectElement
-
   for (const day of dates) {
     await page.waitForSelector(
       '#s2id_tracker_time_entry_new_complete_project_id'
@@ -145,39 +145,44 @@ const isValidUrl = urlString => {
       await browser.close()
       throw new Error('Projekt nicht gefunden: ' + selectedProject)
     }
+    if (!dryRun) {
+      await page.type('#tracker_time_entry_new_complete_task_name', subject, {
+        delay: 100
+      })
 
-    await page.type('#tracker_time_entry_new_complete_task_name', subject, {
-      delay: 100
-    })
+      await page.click('#tracker_time_entry_new_entry_date_f', {clickCount: 3})
+      await page.type('#tracker_time_entry_new_entry_date_f', day, {delay: 100})
+      await page.click('#tracker_time_entry_new_started_at_time', {
+        clickCount: 3
+      })
+      await page.type('#tracker_time_entry_new_started_at_time', firstTime, {
+        delay: 100
+      })
 
-    await page.click('#tracker_time_entry_new_entry_date_f', { clickCount: 3 })
-    await page.type('#tracker_time_entry_new_entry_date_f', day, { delay: 100 })
-    await page.click('#tracker_time_entry_new_started_at_time', {
-      clickCount: 3
-    })
-    await page.type('#tracker_time_entry_new_started_at_time', firstTime, {
-      delay: 100
-    })
+      await page.click('#tracker_time_entry_new_ended_at_time', {clickCount: 3})
+      await page.type('#tracker_time_entry_new_ended_at_time', lastTime, {
+        delay: 100
+      })
 
-    await page.click('#tracker_time_entry_new_ended_at_time', { clickCount: 3 })
-    await page.type('#tracker_time_entry_new_ended_at_time', lastTime, {
-      delay: 100
-    })
-
-    await page.click('input[name="commit"]', { delay: 500 })
-    console.log('Zeit gebucht für: ', day)
-    await page.waitForTimeout(1000)
-    await page.goto(
-      correctUrl + 'zeiterfassung/buchungen?b=&show_new_form=true',
-      { waitUntil: 'networkidle2' }
-    )
+      await page.click('input[name="commit"]', {delay: 500})
+      console.log('Zeit gebucht für: ', day)
+      await page.waitForTimeout(1000)
+      await page.goto(
+          correctUrl + 'zeiterfassung/buchungen?b=&show_new_form=true',
+          {waitUntil: 'networkidle2'}
+      )
+    }
   }
+
+  const firstDateForUrl = moment(new Date(dates[0]));
+  const lastDateForUrl = moment(new Date(dates[dates.length - 1]));
+
   const controlUrl =
     correctUrl +
     'zeiterfassung/buchungen?t=' +
-    firstDateForUrl.format('YYYY-MM-DD') +
+      firstDateForUrl.format('YYYY-MM-DD') +
     '..' +
-    lastDate.format('YYYY-MM-DD')
+    lastDateForUrl.format('YYYY-MM-DD')
   await page.waitForSelector('.logout')
   await page.click('.logout', { delay: 1000 })
   console.log('Logout erfolgreich. Bitte Zeiten kontrollieren: ' + controlUrl)
