@@ -36,6 +36,10 @@ const isValidUrl = urlString => {
   if (dryRun) {
     console.log('Testlauf aktiviert. Es werden keine Zeiten gebucht.')
   }
+
+  const firstDateForUrl = firstDate.format('YYYY-MM-DD')
+  const lastDateForUrl = lastDate.format('YYYY-MM-DD')
+
   if (!isValidUrl(url) && !url.includes('papierkram.de')) {
     console.error('Eingabe URL ist nicht valide: ', url)
     return
@@ -72,7 +76,7 @@ const isValidUrl = urlString => {
       !isSunday &&
       !isHoliday(day.toDate(), selectedRegionKey)
     ) {
-      const dateString = moment(day, 'DD/MM/YYYY').format('DD/MM/YYYY')
+      const dateString = moment(day).format('DD/MM/YYYY')
       dates.push(dateString.split('/').join('.'))
     }
   })
@@ -174,15 +178,13 @@ const isValidUrl = urlString => {
     }
   }
 
-  const firstDateForUrl = moment(new Date(dates[0]));
-  const lastDateForUrl = moment(new Date(dates[dates.length - 1]));
 
   const controlUrl =
     correctUrl +
     'zeiterfassung/buchungen?t=' +
-      firstDateForUrl.format('YYYY-MM-DD') +
+      firstDateForUrl +
     '..' +
-    lastDateForUrl.format('YYYY-MM-DD')
+    lastDateForUrl
   await page.waitForSelector('.logout')
   await page.click('.logout', { delay: 1000 })
   console.log('Logout erfolgreich. Bitte Zeiten kontrollieren: ' + controlUrl)
