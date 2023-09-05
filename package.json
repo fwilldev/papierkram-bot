@@ -1,8 +1,10 @@
 {
   "dependencies": {
     "cli-select": "^1.1.2",
-    "feiertagejs": "^1.3.5",
+    "feiertagejs": "^1.3.9",
+    "keychain": "^1.5.0",
     "moment": "^2.29.4",
+    "password-prompt": "^1.1.3",
     "prompt-sync": "^4.2.0",
     "puppeteer": "^17.0.0"
   },
@@ -16,7 +18,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "mail@fwill.dev",
+  "author": "Fabian Will <mail@fwill.dev>",
+  "contributors": [
+    "Christof Flick <christof.flick@hotmail.de>"
+  ],
   "license": "ISC",
   "description": "",
   "type": "module"

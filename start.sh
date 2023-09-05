@@ -16,15 +16,25 @@ echo "
 
 "
 echo "Automatisch Zeiten buchen vom Start Datum bis End Datum - Wochenenden und Feiertage für ausgewähltes Bundesland ausgeschlossen."
-read -p 'Start Datum (Format: DD.MM.YYYY): ' startdatevar
-read -p 'End Datum (Format: DD.MM.YYYY): ' enddatevar
-read -p 'Start Zeit: (Format: HH:MM) ' starttimevar
-read -p 'End Zeit: (Format: HH:MM) ' endtimevar
+
+while [[ $usemonth != "y" && $usemonth != "n" ]]; do
+  echo ""
+  read -p "Soll für den aktuellen Monat gebucht werden? z.B. wenn keine Urlaub genommen wurde [y/n]" usemonth
+done
+if [[ $usemonth == "y" ]]; then
+  echo "Es wird für den aktuellen Monat gebucht"
+else
+  read -p 'Start Datum (Format: DD.MM.YYYY): ' startdatevar
+  read -p 'End Datum (Format: DD.MM.YYYY): ' enddatevar
+  read -p 'Start Zeit: (Format: HH:MM) ' starttimevar
+  read -p 'End Zeit: (Format: HH:MM) ' endtimevar
+fi
 
 if [ -f history.json ]; then
   urlvar=$(grep -o '"url": "[^"]*' history.json | grep -o '[^"]*$')
   descriptionvar=$(grep -o '"subject": "[^"]*' history.json | grep -o '[^"]*$')
   emailvar=$(grep -o '"email": "[^"]*' history.json | grep -o '[^"]*$')
+  passwortvar=$(grep -o '"password": "[^"]*' history.json | grep -o '[^"]*$')
   echo '-----------Historie-----------'
   echo 'Zuletzt verwendet:'
   echo 'Papierkram-URL: ' "$urlvar"
@@ -40,21 +50,29 @@ if [ -f history.json ]; then
       echo "Neue Werte eingeben: "
       read -p 'Papierkram URL: ' urlvar
       read -p 'Tätigkeitsbeschreibung: (zB Entwicklung) ' descriptionvar
-      read -p 'Email Adresse: ' emailvar
+      read -p 'E-Mail Adresse: ' emailvar
+      echo 'Passwort: '
+      read -s passwortvar
   fi
 else
   read -p 'Papierkram URL: ' urlvar
   read -p 'Tätigkeitsbeschreibung: (zB Entwicklung) ' descriptionvar
-  read -p 'Email Adresse: ' emailvar
+  read -p 'E-Mail Adresse: ' emailvar
+  echo 'Passwort: '
+  read -s passwortvar
 fi
 
-echo 'Passwort: '
-read -s passwortvar
-
-if test -z "$startdatevar" || test -z "$enddatevar" || test -z "$starttimevar" || test -z "$endtimevar" || test -z "$startdatevar" || test -z "$descriptionvar" || test -z "$emailvar" || test -z "$passwortvar"; then
-      echo "Ein Argument ist leer. Bitte alle Argumente ausfüllen!"
-      exit 0
+if [[ $usemonth == "n" ]]; then
+  if test -z "$startdatevar" || test -z "$enddatevar" || test -z "$starttimevar" || test -z "$endtimevar" || test -z "$descriptionvar" || test -z "$emailvar" || test -z "$passwortvar"; then
+    echo "Ein Argument ist leer. Bitte alle Argumente ausfüllen!"
+    exit 0
+  fi
+else
+  if test -z "$descriptionvar" || test -z "$emailvar"; then
+    echo "Ein Argument ist leer. Bitte alle Argumente ausfüllen!"
+    exit 0
+  fi
 fi
 
-node index.js "$startdatevar" "$enddatevar" "$starttimevar" "$endtimevar" "$descriptionvar" "$emailvar" "$passwortvar" "$urlvar"
+node index.js "$startdatevar" "$enddatevar" "$starttimevar" "$endtimevar" "$descriptionvar" "$emailvar" "$passwortvar" "$urlvar" "$usemonth"
 echo "Script durchgelaufen."
