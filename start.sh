@@ -59,7 +59,7 @@ else
 fi
 
 if [[ $usemonth == "n" ]]; then
-  if test -z "$startdatevar" || test -z "$enddatevar" || test -z "$starttimevar" || test -z "$endtimevar" || test -z "$descriptionvar" || test -z "$emailvar" ; then
+  if test -z "$startdatevar" || test -z "$enddatevar" || test -z "$starttimevar" || test -z "$endtimevar" || test -z "$descriptionvar" || test -z "$emailvar" || test "$urlvar" || test "$usemonth" ; then
     echo "Ein Argument ist leer. Bitte alle Argumente ausfüllen!"
     exit 0
   fi
