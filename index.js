@@ -55,19 +55,26 @@ const getPassword = email =>
   const email = process.argv[7]
   history.set('email', email)
 
-  const pwArg = process.argv[8]?.trim()
-  let url = process.argv[9]
-  const useMonth = process.argv[10].toLowerCase() === 'y'
-  const dryRun = (process.argv[11] === 'true') // if true the bot will not book any times
+  let url = process.argv[8]
+  const useMonth = process.argv[9].toLowerCase() === 'y'
+  const dryRun = (process.argv[10] === 'true') // if true the bot will not book any times
+
+  const isMacOs = process.platform === 'darwin'
   let savedPassword
   let newPassword
 
-  try {
-    savedPassword = await getPassword(email)
-  } catch (_) {}
+  if (isMacOs) {
+    const useKeychain = await prompt('Passwort aus Schlüsselbund verwenden? (y/n)')
+    if (useKeychain === 'y') {
+      try {
+        savedPassword = await getPassword(email)
+      } catch (_) {
+      }
+    }
+  }
 
   if (!pwArg && !savedPassword) {
-    newPassword = await prompt('Passwort: ', { mask: true })
+    newPassword = await prompt('Passwort: ', {mask: true})
   }
 
   const passwordToSet = pwArg || savedPassword || newPassword

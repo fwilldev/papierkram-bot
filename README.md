@@ -25,10 +25,12 @@ Das Script leitet durch die einzelnen Schritte.
 
 Die Papierkram-URL muss dabei immer die Subdomain bzw. URL zu der persönlichen Instanz sein!
 
-Der Bot erfasst Zeiten in einem gegebenen Zeitraum und lässt dabei Wochenenden automatisch aus.
+Der Bot erfasst Zeiten in einem gegebenen Zeitraum und lässt dabei Wochenenden und Feiertage automatisch aus.
 
 In der History werden folgende Elemente gespeichert und können wiederverwendet werden:
 
 - Login E-Mail
 - Tätigkeit
 - Papierkram-URL
+
+Außerdem kann unter MacOS das Passwort im Schlüsselbund gespeichert werden. 
