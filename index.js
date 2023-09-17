@@ -6,6 +6,8 @@ import history from './history.js'
 import cliSelect from 'cli-select'
 import regionCodes from './regioncodes.js'
 import { isHoliday } from 'feiertagejs'
+import keychain from 'keychain'
+import prompt from 'password-prompt'
 
 const isValidUrl = urlString => {
   const urlPattern = new RegExp(
@@ -20,19 +22,64 @@ const isValidUrl = urlString => {
   return !!urlPattern.test(urlString)
 }
 
+const getPassword = email =>
+  new Promise((resolve, reject) => {
+    keychain.getPassword(
+      {
+        account: email,
+        service: 'Papierkram Credentials',
+        type: 'internet'
+      },
+      (err, pw) => {
+        if (err) {
+          reject(err)
+        } else if (pw) {
+          resolve(pw)
+        } else {
+          resolve(null)
+        }
+      }
+    )
+  })
+
 ;(async () => {
   moment.locale('de')
-  const firstDate = moment(process.argv[2], 'DD/MM/YYYY') // start date
-  const lastDate = moment(process.argv[3], 'DD/MM/YYYY') // end date
-  const firstTime = process.argv[4] // start time
-  const lastTime = process.argv[5] // end time
+
+  let firstDate = moment(process.argv[2], 'DD/MM/YYYY') // start date
+  let lastDate = moment(process.argv[3], 'DD/MM/YYYY') // end date
+  let firstTime = process.argv[4] // start time
+  let lastTime = process.argv[5] // end time
+
   const subject = process.argv[6] // Subject you want to book
   history.set('subject', subject)
   const email = process.argv[7]
   history.set('email', email)
-  const password = process.argv[8]
+
+  const pwArg = process.argv[8]?.trim()
   let url = process.argv[9]
-  const dryRun = (process.argv[10] === 'true') // if true the bot will not book any times
+  const useMonth = process.argv[10].toLowerCase() === 'y'
+  const dryRun = (process.argv[11] === 'true') // if true the bot will not book any times
+  let savedPassword
+  let newPassword
+
+  try {
+    savedPassword = await getPassword(email)
+  } catch (_) {}
+
+  if (!pwArg && !savedPassword) {
+    newPassword = await prompt('Passwort: ', { mask: true })
+  }
+
+  const passwordToSet = pwArg || savedPassword || newPassword
+
+  keychain.setPassword({
+    account: email,
+    service: 'Papierkram Credentials',
+    type: 'internet',
+    password: passwordToSet
+  })
+
+
   if (dryRun) {
     console.log('Testlauf aktiviert. Es werden keine Zeiten gebucht.')
   }
@@ -52,14 +99,28 @@ const isValidUrl = urlString => {
   const regionKeys = Object.keys(regionCodes)
 
   console.log(
-    'Welches Bundesland und deren Feiertage sollen berücksichtigt werden? '
+    'Von welchem Bundesland sollen die Feiertage berücksichtigt werden? '
   )
   const selectedRegion = await cliSelect({
     values: regionNames
   })
 
   const selectedRegionKey =
-    regionKeys[regionNames.indexOf(selectedRegion.value)]
+  regionKeys[regionNames.indexOf(selectedRegion.value)]
+  console.log('Gewähltes Bundesland: ', selectedRegion.value.trim())
+
+  if (useMonth) {
+    const currentDate = moment()
+    firstDate = currentDate.clone().startOf('month')
+    lastDate = currentDate.clone().endOf('month')
+    firstTime = '08:00'
+    lastTime = '16:00'
+
+    console.log(`Buchung für ${currentDate.format('MMMM YYYY')}`)
+    console.log(`Erster Tag: ${firstDate.format('DD.MM.YYYY')} ${firstTime}`)
+    console.log(`Letzter Tag: ${lastDate.format('DD.MM.YYYY')} ${lastTime}`)
+  }
+
   let result = [moment({ ...firstDate })]
 
   while (lastDate.date() !== firstDate.date()) {
@@ -67,20 +128,17 @@ const isValidUrl = urlString => {
     result.push(moment({ ...firstDate }))
   }
 
-  let dates = []
-  result.map(day => {
-    const isSaturday = day.toDate().getDay() === 6
-    const isSunday = day.toDate().getDay() === 0
-    if (
-      !isSaturday &&
-      !isSunday &&
-      !isHoliday(day.toDate(), selectedRegionKey)
-    ) {
-      const dateString = moment(day).format('DD/MM/YYYY')
-      dates.push(dateString.split('/').join('.'))
-    }
-  })
-  if (dates.length === 0) {
+  const validDates = result
+    .filter(day => {
+      const isSaturday = day.toDate().getDay() === 6
+      const isSunday = day.toDate().getDay() === 0
+      return (
+        !isSaturday && !isSunday && !isHoliday(day.toDate(), selectedRegionKey)
+      )
+    })
+    .map(day => moment(day).format('DD.MM.YYYY'))
+
+  if (!validDates.length) {
     console.log(
       'In der angegebenen Zeitspanne wurden keine validen Tage gefunden.'
     )
