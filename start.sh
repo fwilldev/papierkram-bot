@@ -16,9 +16,15 @@ echo "
 
 "
 echo "Automatisch Zeiten buchen vom Start Datum bis End Datum - Wochenenden und Feiertage für ausgewähltes Bundesland ausgeschlossen."
-echo "Aktueller Monat: "
-echo ""
-cal
+if command -v cal > /dev/null 2>&1; then
+  echo "Aktueller Monat: "
+  echo ""
+  cal
+fi
+if command -v date > /dev/null 2>&1;  then
+  now=$(date +"%d.%m.%Y")
+  echo "Heutiges Datum: $now"
+fi
 while [[ $usemonth != "y" && $usemonth != "n" ]]; do
   echo ""
   read -p "Soll für den aktuellen Monat gebucht werden? z.B. wenn keine Urlaub genommen wurde [y/n]" usemonth
