@@ -16,6 +16,7 @@ echo "
 
 "
 echo "Automatisch Zeiten buchen vom Start Datum bis End Datum - Wochenenden und Feiertage für ausgewähltes Bundesland ausgeschlossen."
+echo "Drücke STRG+C um das Skript abzubrechen!"
 if command -v cal > /dev/null 2>&1; then
   echo "Aktueller Monat: "
   echo ""
@@ -29,12 +30,20 @@ while [[ $usemonth != "y" && $usemonth != "n" ]]; do
   echo ""
   read -p "Soll für den aktuellen Monat gebucht werden? z.B. wenn keine Urlaub genommen wurde [y/n]" usemonth
 done
-
-if [[ $usemonth == "y" ]]; then
-  echo "Es wird für den aktuellen Monat gebucht"
-else
+while [[ $eightHours != "y" && $eightHours != "n" ]]; do
+  echo ""
+  read -p "Sollen immer 8 Stunden (08:00 Uhr bis 16:00 Uhr) gebucht werden? [y/n]" eightHours
+done
+if [[ $usemonth == "n" ]]; then
+  echo "Bitte Start und End Datum eingeben: "
   read -p 'Start Datum (Format: DD.MM.YYYY): ' startdatevar
   read -p 'End Datum (Format: DD.MM.YYYY): ' enddatevar
+fi
+if [[ $eightHours == "y" ]]; then
+  starttimevar='08:00'
+  endtimevar='16:00'
+else
+  echo "Bitte Start Zeit und End Zeit eingeben: "
   read -p 'Start Zeit: (Format: HH:MM) ' starttimevar
   read -p 'End Zeit: (Format: HH:MM) ' endtimevar
 fi
@@ -67,7 +76,7 @@ else
 fi
 
 if [[ $usemonth == "n" ]]; then
-  if test -z "$startdatevar" || test -z "$enddatevar" || test -z "$starttimevar" || test -z "$endtimevar" || test -z "$descriptionvar" || test -z "$emailvar" || test "$urlvar" || test "$usemonth" ; then
+  if test -z "$startdatevar" || test -z "$enddatevar" || test -z "$starttimevar" || test -z "$endtimevar" || test -z "$descriptionvar" || test -z "$emailvar" || test -z "$urlvar" ; then
     echo "Ein Argument ist leer. Bitte alle Argumente ausfüllen!"
     exit 0
   fi

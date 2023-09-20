@@ -3,11 +3,11 @@
 import puppeteer from 'puppeteer'
 import moment from 'moment'
 import history from './history.js'
-import cliSelect from 'cli-select'
 import regionCodes from './regioncodes.js'
 import { isHoliday } from 'feiertagejs'
 import keychain from 'keychain'
-import prompt from 'password-prompt'
+import {confirm, select} from '@inquirer/prompts'
+
 
 const isValidUrl = urlString => {
   const urlPattern = new RegExp(
@@ -60,31 +60,40 @@ const getPassword = email =>
   const dryRun = (process.argv[10] === 'true') // if true the bot will not book any times
 
   const isMacOs = process.platform === 'darwin'
-  let savedPassword
-  let newPassword
-
+  let password
+  let isNewPassword = true
   if (isMacOs) {
-    const useKeychain = await prompt('Passwort aus Schlüsselbund verwenden? (y/n)')
-    if (useKeychain === 'y') {
-      try {
-        savedPassword = await getPassword(email)
-      } catch (_) {
-      }
+      const useKeychain = await confirm({message: 'Passwort aus Schlüsselbund verwenden? ', default: false})
+      if (useKeychain) {
+        try {
+          password = await getPassword(email)
+          isNewPassword = false
+        } catch (_) {
+          console.log("Kein Passwort für Papierkram-Bot im Schlüsselbund gefunden. ")
+          isNewPassword = true
+        }
     }
   }
 
-  if (!pwArg && !savedPassword) {
-    newPassword = await prompt('Passwort: ', {mask: true})
+  if (!password) {
+    password = await password({message: "Passwort: ", mask: true})
+    isNewPassword = true
   }
 
-  const passwordToSet = pwArg || savedPassword || newPassword
-
-  keychain.setPassword({
-    account: email,
-    service: 'Papierkram Credentials',
-    type: 'internet',
-    password: passwordToSet
-  })
+  if (isMacOs && isNewPassword) {
+    while (true) {
+      const saveInKeychain = await confirm({message: "Passwort im Schlüsselbund speichern? ", default: false})
+      if (saveInKeychain) {
+        keychain.setPassword({
+          account: email,
+          service: 'Papierkram Credentials',
+          type: 'internet',
+          password: password
+        })
+        break;
+      }
+    }
+  }
 
 
   if (dryRun) {
@@ -102,19 +111,16 @@ const getPassword = email =>
   history.set('url', url)
   history.save()
 
-  const regionNames = Object.values(regionCodes)
-  const regionKeys = Object.keys(regionCodes)
+  let regionChoices = [];
+  for (const [regionName, regionKey] of Object.entries(regionCodes)) {
+    regionChoices.push({name: regionKey, value: regionName})
+  }
 
-  console.log(
-    'Von welchem Bundesland sollen die Feiertage berücksichtigt werden? '
-  )
-  const selectedRegion = await cliSelect({
-    values: regionNames
+  const selectedRegion = await select({
+    message: 'Von welchem Bundesland sollen die Feiertage berücksichtigt werden? ',
+    choices: regionChoices,
+    pageSize: 26
   })
-
-  const selectedRegionKey =
-  regionKeys[regionNames.indexOf(selectedRegion.value)]
-  console.log('Gewähltes Bundesland: ', selectedRegion.value.trim())
 
   if (useMonth) {
     const currentDate = moment()
@@ -140,7 +146,7 @@ const getPassword = email =>
       const isSaturday = day.toDate().getDay() === 6
       const isSunday = day.toDate().getDay() === 0
       return (
-        !isSaturday && !isSunday && !isHoliday(day.toDate(), selectedRegionKey)
+        !isSaturday && !isSunday && !isHoliday(day.toDate(), selectedRegion)
       )
     })
     .map(day => moment(day).format('DD.MM.YYYY'))
@@ -152,7 +158,7 @@ const getPassword = email =>
     return
   }
 
-  console.log('Auf folgende Tage wird gebucht: ', dates)
+  console.log('Auf folgende Tage wird gebucht: ', validDates)
   const browser = await puppeteer.launch({
     headless: true
   })
@@ -178,7 +184,7 @@ const getPassword = email =>
   )
   let selectedProject = ''
   let projectElement
-  for (const day of dates) {
+  for (const day of validDates) {
     await page.waitForSelector(
       '#s2id_tracker_time_entry_new_complete_project_id'
     )
@@ -190,14 +196,18 @@ const getPassword = email =>
 
     if (selectedProject.length === 0) {
       console.log('Verfügbare Projekte: ')
-      const selection = await cliSelect({
-        values: await Promise.all(
-          elementHandle.map(
-            async el => await page.evaluate(e => e.textContent, el)
-          )
-        )
+
+      let projectChoices = []
+      for (const el of elementHandle) {
+        const val = await page.evaluate(e => e.textContent, el)
+        projectChoices.push({name: val, value: val})
+      }
+
+      selectedProject = await select({
+        message: 'Auf welches Projekt soll gebucht werden? ',
+        choices: projectChoices,
+        pageSize: 26
       })
-      selectedProject = selection.value
     }
 
     for (const e of elementHandle) {
