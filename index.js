@@ -81,7 +81,6 @@ const getPassword = email =>
   }
 
   if (isMacOs && isNewPassword) {
-    while (true) {
       const saveInKeychain = await confirm({message: "Passwort im Schlüsselbund speichern? ", default: false})
       if (saveInKeychain) {
         keychain.setPassword({
@@ -90,9 +89,7 @@ const getPassword = email =>
           type: 'internet',
           password: password
         })
-        break;
       }
-    }
   }
 
 
