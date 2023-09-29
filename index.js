@@ -6,8 +6,7 @@ import history from './history.js'
 import regionCodes from './regioncodes.js'
 import { isHoliday } from 'feiertagejs'
 import keychain from 'keychain'
-import {confirm, select} from '@inquirer/prompts'
-
+import { confirm, select } from '@inquirer/prompts'
 
 const isValidUrl = urlString => {
   const urlPattern = new RegExp(
@@ -57,48 +56,52 @@ const getPassword = email =>
 
   let url = process.argv[8]
   const useMonth = process.argv[9].toLowerCase() === 'y'
-  const dryRun = (process.argv[10] === 'true') // if true the bot will not book any times
+  const dryRun = process.argv[10] === 'true' // if true the bot will not book any times
 
   const isMacOs = process.platform === 'darwin'
   let password
   let isNewPassword = true
   if (isMacOs) {
-      const useKeychain = await confirm({message: 'Passwort aus Schlüsselbund verwenden? ', default: false})
-      if (useKeychain) {
-        try {
-          password = await getPassword(email)
-          isNewPassword = false
-        } catch (_) {
-          console.log("Kein Passwort für Papierkram-Bot im Schlüsselbund gefunden. ")
-          isNewPassword = true
-        }
+    const useKeychain = await confirm({
+      message: 'Passwort aus Schlüsselbund verwenden? ',
+      default: false
+    })
+    if (useKeychain) {
+      try {
+        password = await getPassword(email)
+        isNewPassword = false
+      } catch (_) {
+        console.log(
+          'Kein Passwort für Papierkram-Bot im Schlüsselbund gefunden. '
+        )
+        isNewPassword = true
+      }
     }
   }
 
   if (!password) {
-    password = await password({message: "Passwort: ", mask: true})
+    password = await password({ message: 'Passwort: ', mask: true })
     isNewPassword = true
   }
 
   if (isMacOs && isNewPassword) {
-      const saveInKeychain = await confirm({message: "Passwort im Schlüsselbund speichern? ", default: false})
-      if (saveInKeychain) {
-        keychain.setPassword({
-          account: email,
-          service: 'Papierkram Credentials',
-          type: 'internet',
-          password: password
-        })
-      }
+    const saveInKeychain = await confirm({
+      message: 'Passwort im Schlüsselbund speichern? ',
+      default: false
+    })
+    if (saveInKeychain) {
+      keychain.setPassword({
+        account: email,
+        service: 'Papierkram Credentials',
+        type: 'internet',
+        password: password
+      })
+    }
   }
-
 
   if (dryRun) {
     console.log('Testlauf aktiviert. Es werden keine Zeiten gebucht.')
   }
-
-  const firstDateForUrl = firstDate.format('YYYY-MM-DD')
-  const lastDateForUrl = lastDate.format('YYYY-MM-DD')
 
   if (!isValidUrl(url) && !url.includes('papierkram.de')) {
     console.error('Eingabe URL ist nicht valide: ', url)
@@ -108,13 +111,14 @@ const getPassword = email =>
   history.set('url', url)
   history.save()
 
-  let regionChoices = [];
+  let regionChoices = []
   for (const [regionName, regionKey] of Object.entries(regionCodes)) {
-    regionChoices.push({name: regionKey, value: regionName})
+    regionChoices.push({ name: regionKey, value: regionName })
   }
 
   const selectedRegion = await select({
-    message: 'Von welchem Bundesland sollen die Feiertage berücksichtigt werden? ',
+    message:
+      'Von welchem Bundesland sollen die Feiertage berücksichtigt werden? ',
     choices: regionChoices,
     pageSize: 26
   })
@@ -130,6 +134,9 @@ const getPassword = email =>
     console.log(`Erster Tag: ${firstDate.format('DD.MM.YYYY')} ${firstTime}`)
     console.log(`Letzter Tag: ${lastDate.format('DD.MM.YYYY')} ${lastTime}`)
   }
+
+  const firstDateForUrl = firstDate.format('YYYY-MM-DD')
+  const lastDateForUrl = lastDate.format('YYYY-MM-DD')
 
   let result = [moment({ ...firstDate })]
 
@@ -197,7 +204,7 @@ const getPassword = email =>
       let projectChoices = []
       for (const el of elementHandle) {
         const val = await page.evaluate(e => e.textContent, el)
-        projectChoices.push({name: val, value: val})
+        projectChoices.push({ name: val, value: val })
       }
 
       selectedProject = await select({
@@ -226,8 +233,12 @@ const getPassword = email =>
         delay: 100
       })
 
-      await page.click('#tracker_time_entry_new_entry_date_f', {clickCount: 3})
-      await page.type('#tracker_time_entry_new_entry_date_f', day, {delay: 100})
+      await page.click('#tracker_time_entry_new_entry_date_f', {
+        clickCount: 3
+      })
+      await page.type('#tracker_time_entry_new_entry_date_f', day, {
+        delay: 100
+      })
       await page.click('#tracker_time_entry_new_started_at_time', {
         clickCount: 3
       })
@@ -235,26 +246,27 @@ const getPassword = email =>
         delay: 100
       })
 
-      await page.click('#tracker_time_entry_new_ended_at_time', {clickCount: 3})
+      await page.click('#tracker_time_entry_new_ended_at_time', {
+        clickCount: 3
+      })
       await page.type('#tracker_time_entry_new_ended_at_time', lastTime, {
         delay: 100
       })
 
-      await page.click('input[name="commit"]', {delay: 500})
+      await page.click('input[name="commit"]', { delay: 500 })
       console.log('Zeit gebucht für: ', day)
       await page.waitForTimeout(1000)
       await page.goto(
-          correctUrl + 'zeiterfassung/buchungen?b=&show_new_form=true',
-          {waitUntil: 'networkidle2'}
+        correctUrl + 'zeiterfassung/buchungen?b=&show_new_form=true',
+        { waitUntil: 'networkidle2' }
       )
     }
   }
 
-
   const controlUrl =
     correctUrl +
     'zeiterfassung/buchungen?t=' +
-      firstDateForUrl +
+    firstDateForUrl +
     '..' +
     lastDateForUrl
   await page.waitForSelector('.logout')
