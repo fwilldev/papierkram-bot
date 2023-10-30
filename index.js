@@ -6,7 +6,7 @@ import history from './history.js'
 import regionCodes from './regioncodes.js'
 import { isHoliday } from 'feiertagejs'
 import keychain from 'keychain'
-import { confirm, select } from '@inquirer/prompts'
+import { confirm, select, password } from '@inquirer/prompts'
 
 const isValidUrl = urlString => {
   const urlPattern = new RegExp(
@@ -59,7 +59,7 @@ const getPassword = email =>
   const dryRun = process.argv[10] === 'true' // if true the bot will not book any times
 
   const isMacOs = process.platform === 'darwin'
-  let password
+  let passwordValue
   let isNewPassword = true
   if (isMacOs) {
     const useKeychain = await confirm({
@@ -68,7 +68,7 @@ const getPassword = email =>
     })
     if (useKeychain) {
       try {
-        password = await getPassword(email)
+        passwordValue = await getPassword(email)
         isNewPassword = false
       } catch (_) {
         console.log(
@@ -79,8 +79,8 @@ const getPassword = email =>
     }
   }
 
-  if (!password) {
-    password = await password({ message: 'Passwort: ', mask: true })
+  if (!passwordValue) {
+    passwordValue = await password({ message: 'Passwort: ', mask: true })
     isNewPassword = true
   }
 
@@ -94,7 +94,7 @@ const getPassword = email =>
         account: email,
         service: 'Papierkram Credentials',
         type: 'internet',
-        password: password
+        password: passwordValue
       })
     }
   }
@@ -177,7 +177,7 @@ const getPassword = email =>
   console.log(`Logge ein in: ${correctUrl}`)
   await page.goto(`${correctUrl}login`, { waitUntil: 'networkidle2' })
   await page.type('#user_new_email', email, { delay: 100 })
-  await page.type('#user_new_password', password, { delay: 100 })
+  await page.type('#user_new_password', passwordValue, { delay: 100 })
   await page.click('input[name="commit"]', { delay: 500 })
   await page.waitForSelector('.user-name')
   await page.waitForSelector('i.icon-pk-tracker')
