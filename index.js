@@ -6,7 +6,7 @@ import history from './history.js'
 import regionCodes from './regioncodes.js'
 import { isHoliday } from 'feiertagejs'
 import keychain from 'keychain'
-import {confirm, select} from '@inquirer/prompts'
+import {confirm, password, select} from '@inquirer/prompts'
 
 
 const isValidUrl = urlString => {
@@ -60,13 +60,13 @@ const getPassword = email =>
   const dryRun = (process.argv[10] === 'true') // if true the bot will not book any times
 
   const isMacOs = process.platform === 'darwin'
-  let password
+  let pw
   let isNewPassword = true
   if (isMacOs) {
       const useKeychain = await confirm({message: 'Passwort aus Schlüsselbund verwenden? ', default: false})
       if (useKeychain) {
         try {
-          password = await getPassword(email)
+          pw = await getPassword(email)
           isNewPassword = false
         } catch (_) {
           console.log("Kein Passwort für Papierkram-Bot im Schlüsselbund gefunden. ")
@@ -75,8 +75,8 @@ const getPassword = email =>
     }
   }
 
-  if (!password) {
-    password = await password({message: "Passwort: ", mask: true})
+  if (!pw) {
+    pw = await password({message: "Passwort: ", mask: true})
     isNewPassword = true
   }
 
@@ -87,7 +87,7 @@ const getPassword = email =>
           account: email,
           service: 'Papierkram Credentials',
           type: 'internet',
-          password: password
+          password: pw
         })
       }
   }
