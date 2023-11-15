@@ -123,8 +123,6 @@ const getPassword = email =>
     const currentDate = moment()
     firstDate = currentDate.clone().startOf('month')
     lastDate = currentDate.clone().endOf('month')
-    firstTime = '08:00'
-    lastTime = '16:00'
 
     console.log(`Buchung für ${currentDate.format('MMMM YYYY')}`)
     console.log(`Erster Tag: ${firstDate.format('DD.MM.YYYY')} ${firstTime}`)
