@@ -168,7 +168,7 @@ const getPassword = email =>
   console.log(`Logge ein in: ${correctUrl}`)
   await page.goto(`${correctUrl}login`, { waitUntil: 'networkidle2' })
   await page.type('#user_new_email', email, { delay: 100 })
-  await page.type('#user_new_password', password, { delay: 100 })
+  await page.type('#user_new_password', pw, { delay: 100 })
   await page.click('input[name="commit"]', { delay: 500 })
   await page.waitForSelector('.user-name')
   await page.waitForSelector('i.icon-pk-tracker')
