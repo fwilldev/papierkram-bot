@@ -22,7 +22,10 @@ Installierte Software:
 ## Benutzung
 
 Linux/MacOS/WSL:
-- das start.sh Skript ausführen
+- `./start.sh` - script ausführen
+
+Windows:
+- Powershell-Script `start.ps1` ausführen 
 
 Das Script leitet durch die einzelnen Schritte.
 
