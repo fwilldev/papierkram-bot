@@ -2,11 +2,11 @@
 
 import puppeteer from 'puppeteer';
 import moment from 'moment';
-import history from './history.js';
-import regionCodes from './regioncodes.js';
 import { isHoliday } from 'feiertagejs';
 import keychain from 'keychain';
 import { confirm, password, select } from '@inquirer/prompts';
+import regionCodes from './regioncodes.js';
+import history from './history.js';
 
 const isValidUrl = (urlString) => {
 	const urlPattern = new RegExp(
@@ -46,15 +46,15 @@ const getPassword = (email) =>
 
 	let firstDate = moment(process.argv[2], 'DD/MM/YYYY'); // start date
 	let lastDate = moment(process.argv[3], 'DD/MM/YYYY'); // end date
-	let firstTime = process.argv[4]; // start time
-	let lastTime = process.argv[5]; // end time
+	const firstTime = process.argv[4]; // start time
+	const lastTime = process.argv[5]; // end time
 
 	const subject = process.argv[6]; // Subject you want to book
 	history.set('subject', subject);
 	const email = process.argv[7];
 	history.set('email', email);
 
-	let url = process.argv[8];
+	const url = process.argv[8];
 	const useMonth = process.argv[9].toLowerCase() === 'y';
 	const dryRun = process.argv[10] === 'true'; // if true the bot will not book any times
 
@@ -103,9 +103,6 @@ const getPassword = (email) =>
 		console.log('Testlauf aktiviert. Es werden keine Zeiten gebucht.');
 	}
 
-	const firstDateForUrl = firstDate.format('YYYY-MM-DD');
-	const lastDateForUrl = lastDate.format('YYYY-MM-DD');
-
 	if (!isValidUrl(url) && !url.includes('papierkram.de')) {
 		console.error('Eingabe URL ist nicht valide: ', url);
 		return;
@@ -114,7 +111,7 @@ const getPassword = (email) =>
 	history.set('url', url);
 	history.save();
 
-	let regionChoices = [];
+	const regionChoices = [];
 	for (const [regionName, regionKey] of Object.entries(regionCodes)) {
 		regionChoices.push({ name: regionKey, value: regionName });
 	}
@@ -136,7 +133,10 @@ const getPassword = (email) =>
 		console.log(`Letzter Tag: ${lastDate.format('DD.MM.YYYY')} ${lastTime}`);
 	}
 
-	let result = [moment({ ...firstDate })];
+	const firstDateForUrl = firstDate.format('YYYY-MM-DD');
+	const lastDateForUrl = lastDate.format('YYYY-MM-DD');
+
+	const result = [moment({ ...firstDate })];
 
 	while (lastDate.date() !== firstDate.date()) {
 		firstDate.add(1, 'day');
@@ -171,7 +171,7 @@ const getPassword = (email) =>
 		height: 1080,
 		deviceScaleFactor: 1,
 	});
-	const correctUrl = url.trim().endsWith('/') ? url : url + '/';
+	const correctUrl = url.trim().endsWith('/') ? url : `${url}/`;
 	console.log(`Logge ein in: ${correctUrl}`);
 	await page.goto(`${correctUrl}login`, { waitUntil: 'networkidle2' });
 	await page.type('#user_new_email', email, { delay: 100 });
@@ -181,25 +181,26 @@ const getPassword = (email) =>
 	await page.waitForSelector('i.icon-pk-tracker');
 	console.log(`Login erfolgreich für User: ${email}`);
 	await page.goto(
-		correctUrl + 'zeiterfassung/buchungen?b=&show_new_form=true',
+		`${correctUrl}zeiterfassung/buchungen?b=&show_new_form=true`,
 		{ waitUntil: 'networkidle2' }
 	);
 	let selectedProject = '';
 	let projectElement;
-	for (const day of validDates) {
+	for (let i = 0; i < validDates.length; i++) {
+		const day = validDates[i];
 		await page.waitForSelector(
 			'#s2id_tracker_time_entry_new_complete_project_id'
 		);
 		await page.click('#s2id_tracker_time_entry_new_complete_project_id');
 		await new Promise((resolve) => setTimeout(resolve, 1000));
-		let elementHandle = await page.$$(
+		const elementHandle = await page.$$(
 			'.select2-results-dept-1 .select2-result-label'
 		);
 
 		if (selectedProject.length === 0) {
 			console.log('Verfügbare Projekte: ');
 
-			let projectChoices = [];
+			const projectChoices = [];
 			for (const el of elementHandle) {
 				const val = await page.evaluate((e) => e.textContent, el);
 				projectChoices.push({ name: val, value: val });
@@ -224,7 +225,7 @@ const getPassword = (email) =>
 			await projectElement.click({ delay: 200 });
 		} else {
 			await browser.close();
-			throw new Error('Projekt nicht gefunden: ' + selectedProject);
+			throw new Error(`Projekt nicht gefunden: ${selectedProject}`);
 		}
 		if (!dryRun) {
 			await page.type('#tracker_time_entry_new_complete_task_name', subject, {
@@ -255,20 +256,15 @@ const getPassword = (email) =>
 			console.log('Zeit gebucht für: ', day);
 			await page.waitForTimeout(1000);
 			await page.goto(
-				correctUrl + 'zeiterfassung/buchungen?b=&show_new_form=true',
+				`${correctUrl}zeiterfassung/buchungen?b=&show_new_form=true`,
 				{ waitUntil: 'networkidle2' }
 			);
 		}
 	}
 
-	const controlUrl =
-		correctUrl +
-		'zeiterfassung/buchungen?t=' +
-		firstDateForUrl +
-		'..' +
-		lastDateForUrl;
+	const controlUrl = `${correctUrl}zeiterfassung/buchungen?t=${firstDateForUrl}..${lastDateForUrl}`;
 	await page.waitForSelector('.logout');
 	await page.click('.logout', { delay: 1000 });
-	console.log('Logout erfolgreich. Bitte Zeiten kontrollieren: ' + controlUrl);
+	console.log(`Logout erfolgreich. Bitte Zeiten kontrollieren: ${controlUrl}`);
 	await browser.close();
 })();

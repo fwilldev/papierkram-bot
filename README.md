@@ -1,9 +1,10 @@
 # Papierkram-Bot
 
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
-[![npm version](https://badge.fury.io/js/papierkram-bot.svg?&kill_cache=1)](https://badge.fury.io/js/papierkram-bot)
 
 Automatische Zeiterfassung für die Finanzbuchhaltungssoftware "Papierkram".
+
+Benötigt keinen Zugriff zur Papierkram API.
 
 ## Systemvoraussetzungen
 
@@ -14,12 +15,14 @@ Installierte Software:
 
 ## Installation
 
-Installation über NPM CLI:
-`npm install -g papierkram-bot`
+- Dieses Projekt auschecken oder herunterladen
+- im entsprechenden Ordner `npm install` ausführen
+
 
 ## Benutzung
 
-In einem Terminal `papierkram-bot` eingeben, um die Software zu starten.
+Linux/MacOS/WSL:
+- das start.sh Skript ausführen
 
 Das Script leitet durch die einzelnen Schritte.
 

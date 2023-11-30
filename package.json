@@ -14,9 +14,7 @@
   "bin": "./start.sh",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write .",
-    "format-check": "prettier --check ."
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Fabian Will <mail@fwill.dev>",
   "contributors": [
@@ -26,6 +24,10 @@
   "description": "",
   "type": "module",
   "devDependencies": {
-    "prettier": "^3.1.0"
+    "eslint": "^8.53.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-unused-imports": "^3.0.0"
   }
 }
