@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer';
 import moment from 'moment';
 import { isHoliday } from 'feiertagejs';
 import keychain from 'keychain';
-import { confirm, password, select } from '@inquirer/prompts';
+import {confirm, input, password, select} from '@inquirer/prompts'
 import regionCodes from './regioncodes.js';
 import history from './history.js';
 
@@ -177,9 +177,33 @@ const getPassword = (email) =>
 	await page.type('#user_new_email', email, { delay: 100 });
 	await page.type('#user_new_password', pw, { delay: 100 });
 	await page.click('input[name="commit"]', { delay: 500 });
-	await page.waitForSelector('.user-name');
-	await page.waitForSelector('i.icon-pk-tracker');
-	console.log(`Login erfolgreich für User: ${email}`);
+
+	try {
+		await page.waitForSelector('#user_email_code_attempt', { timeout: 5000 });
+		console.log('2FA erforderlich. Prüfe deine E-Mails und gebe den Code ein.');
+		const code = await input({ message: '2FA Code: '});
+		await page.type('#user_email_code_attempt', code, { delay: 100 });
+		await page.click('input[name="commit"]', { delay: 500 });
+		try {
+			await page.waitForSelector('.user-name');
+			await page.waitForSelector('i.icon-pk-tracker');
+		} catch (error) {
+			try {
+				await page.waitForSelector('.toast-container', {timeout: 5000});
+			} catch (error) {
+				console.log('Fehler beim Login - 2FA Code falsch oder abgelaufen. Leider wirft einen Papierkram dann komplett raus.' +
+					'Somit muss das Script neu gestartet werden.');
+				await browser.close();
+				return;
+			}
+		}
+		console.log(`Login erfolgreich für User: ${email}`);
+	} catch (error) {
+		console.log('Keine 2FA erforderlich.');
+		await page.waitForSelector('.user-name');
+		await page.waitForSelector('i.icon-pk-tracker');
+		console.log(`Login erfolgreich für User: ${email}`);
+	}
 	await page.goto(
 		`${correctUrl}zeiterfassung/buchungen?b=&show_new_form=true`,
 		{ waitUntil: 'networkidle2' }
