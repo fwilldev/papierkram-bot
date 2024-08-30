@@ -167,43 +167,65 @@ const getPassword = (email) =>
 	const page = await browser.newPage();
 
 	await page.setViewport({
-		width: 1920,
-		height: 1080,
+		width: 1280,
+		height: 720,
 		deviceScaleFactor: 1,
 	});
 	const correctUrl = url.trim().endsWith('/') ? url : `${url}/`;
-	console.log(`Logge ein in: ${correctUrl}`);
-	await page.goto(`${correctUrl}login`, { waitUntil: 'networkidle2' });
-	await page.type('#user_new_email', email, { delay: 100 });
-	await page.type('#user_new_password', pw, { delay: 100 });
-	await page.click('input[name="commit"]', { delay: 500 });
-
-	try {
-		await page.waitForSelector('#user_email_code_attempt', { timeout: 5000 });
-		console.log('2FA erforderlich. Prüfe deine E-Mails und gebe den Code ein.');
-		const code = await input({ message: '2FA Code: '});
-		await page.type('#user_email_code_attempt', code, { delay: 100 });
+	console.log(`Gewählte Papierkram Instanz: ${correctUrl}`);
+	let tryAgain = true;
+	while (tryAgain) {
+		console.log('Login Versuch...');
+		await page.goto(`${correctUrl}login`, { waitUntil: 'networkidle2' });
+		await page.type('#user_new_email', email, { delay: 100 });
+		await page.type('#user_password', pw, { delay: 100 });
 		await page.click('input[name="commit"]', { delay: 500 });
 		try {
-			await page.waitForSelector('.user-name');
-			await page.waitForSelector('i.icon-pk-tracker');
+			console.log('Prüfe, ob eine 2FA erforderlich ist.');
+			await page.waitForSelector('#user_email_code_attempt', {timeout: 5000});
+			console.log('2FA erforderlich. Prüfe deine E-Mails und gebe den Code ein.');
+			const code = await input({message: '2FA Code: '});
+			await page.type('#user_email_code_attempt', code, {delay: 100});
+			await page.click('input[name="commit"]', {delay: 500});
+			try {
+				await page.waitForSelector('.user-name', {timeout: 5000});
+				await page.waitForSelector('i.icon-pk-tracker', {timeout: 5000});
+				tryAgain = false;
+			} catch (error) {
+				try {
+					await page.waitForSelector('.toast-container', {timeout: 5000});
+				} catch (error) {
+					console.log('Fehler beim Login - 2FA Code falsch oder abgelaufen.');
+					tryAgain = await confirm({
+						message: 'Nochmal versuchen? ',
+						default: false,
+					});
+					if (!tryAgain) {
+						await browser.close();
+						return;
+					}
+				}
+			}
 		} catch (error) {
 			try {
-				await page.waitForSelector('.toast-container', {timeout: 5000});
-			} catch (error) {
-				console.log('Fehler beim Login - 2FA Code falsch oder abgelaufen. Leider wirft einen Papierkram dann komplett raus.' +
-					'Somit muss das Script neu gestartet werden.');
-				await browser.close();
-				return;
+				console.log('2FA Maske nicht gefunden. Prüfe ob Login erfolgreich war...')
+				await page.waitForSelector('.user-name')
+				await page.waitForSelector('i.icon-pk-tracker')
+				tryAgain = false;
+			} catch (e) {
+				console.log('Anscheinend war der Login Versuch nicht erfolgreich.');
+				tryAgain = await confirm({
+					message: 'Nochmal versuchen? ',
+					default: false,
+				});
+				if (!tryAgain) {
+					console.log('Script abgebrochen. Fehler: ' + e);
+					return;
+				}
 			}
 		}
-		console.log(`Login erfolgreich für User: ${email}`);
-	} catch (error) {
-		console.log('Keine 2FA erforderlich.');
-		await page.waitForSelector('.user-name');
-		await page.waitForSelector('i.icon-pk-tracker');
-		console.log(`Login erfolgreich für User: ${email}`);
 	}
+	console.log(`Login erfolgreich für User: ${email}`);
 	await page.goto(
 		`${correctUrl}zeiterfassung/buchungen?b=&show_new_form=true`,
 		{ waitUntil: 'networkidle2' }
@@ -256,23 +278,23 @@ const getPassword = (email) =>
 				delay: 100,
 			});
 
-			await page.click('#tracker_time_entry_new_entry_date_f', {
+			await page.click('#tracker_time_entry_entry_date_f', {
 				clickCount: 3,
 			});
-			await page.type('#tracker_time_entry_new_entry_date_f', day, {
+			await page.type('#tracker_time_entry_entry_date_f', day, {
 				delay: 100,
 			});
-			await page.click('#tracker_time_entry_new_started_at_time', {
+			await page.click('#tracker_time_entry_started_at_time', {
 				clickCount: 3,
 			});
-			await page.type('#tracker_time_entry_new_started_at_time', firstTime, {
+			await page.type('#tracker_time_entry_started_at_time', firstTime, {
 				delay: 100,
 			});
 
-			await page.click('#tracker_time_entry_new_ended_at_time', {
+			await page.click('#tracker_time_entry_ended_at_time', {
 				clickCount: 3,
 			});
-			await page.type('#tracker_time_entry_new_ended_at_time', lastTime, {
+			await page.type('#tracker_time_entry_ended_at_time', lastTime, {
 				delay: 100,
 			});
 
