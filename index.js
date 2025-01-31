@@ -162,7 +162,7 @@ const getPassword = (email) =>
 
 	console.log('Auf folgende Tage wird gebucht: ', validDates);
 	const browser = await puppeteer.launch({
-		headless: true,
+		headless: false,
 	});
 	const page = await browser.newPage();
 
@@ -177,7 +177,7 @@ const getPassword = (email) =>
 	while (tryAgain) {
 		console.log('Login Versuch...');
 		await page.goto(`${correctUrl}login`, { waitUntil: 'networkidle2' });
-		await page.type('#user_new_email', email, { delay: 100 });
+		await page.type('#user_email', email, { delay: 100 });
 		await page.type('#user_password', pw, { delay: 100 });
 		await page.click('input[name="commit"]', { delay: 500 });
 		try {
