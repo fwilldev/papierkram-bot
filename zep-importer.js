@@ -140,7 +140,7 @@ console.log(chalk.bgBlue.black('Importiert eine in ZEP erstellte CSV in Papierkr
 		pageSize: 26,
 	});
 
-	const browser = await puppeteer.launch({ headless: false });
+	const browser = await puppeteer.launch({ headless: true });
 	const page = await browser.newPage();
 	await page.setViewport({
 		width: 1920,

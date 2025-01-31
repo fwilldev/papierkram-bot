@@ -162,7 +162,10 @@ const getPassword = (email) =>
 
 	console.log('Auf folgende Tage wird gebucht: ', validDates);
 	const browser = await puppeteer.launch({
-		headless: false,
+		width: 1920,
+		height: 1080,
+		deviceScaleFactor: 1,
+		isMobile: false
 	});
 	const page = await browser.newPage();
 
